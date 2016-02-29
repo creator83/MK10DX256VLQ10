@@ -6,7 +6,7 @@ const char led=6;
 
 int main ()
 {
-	SysTick_Config (SystemCoreClock/1000000);
+	//SysTick_Config (SystemCoreClock/1000000);
 	Gpio A (Gpio::A);
 	A.setOutPort(0xF0);
 	A.setValPort(0xF0);
