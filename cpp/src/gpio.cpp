@@ -47,7 +47,7 @@ void Gpio::SetPinState (uint8_t pin , uint8_t state)
   else clearPin (pin);  
 }
 
-void Gpio::setOutPort (uint32_t value)
+void Gpio::setOutPort (uint32_t value, mode m)
 {
 	union
 	{
@@ -55,8 +55,8 @@ void Gpio::setOutPort (uint32_t value)
 		uint16_t half[2];
 	}val;
 	val.full = value;
-	PORT_GPCLR_REG(portAdrSet[prt]) = (val.half[0]<<16| 0x80 << Alt1);
-	PORT_GPCHR_REG(portAdrSet[prt]) = (val.half[1]<<16| 0x80 << Alt1);
+	PORT_GPCLR_REG(portAdrSet[prt]) = (val.half[0]<<16| 0x80 << m);
+	PORT_GPCHR_REG(portAdrSet[prt]) = (val.half[1]<<16| 0x80 << m);
 	GPIO_PDDR_REG(portAdr[prt]) |= value;
 }
 

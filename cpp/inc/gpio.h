@@ -42,7 +42,7 @@ public:
   void clearPin (uint8_t pin);	
   void setValPort (uint32_t value);	
 void clearValPort (uint32_t value);	
-  void setOutPort (uint32_t value);		
+  void setOutPort (uint32_t value, mode m = Alt1);
   void ChangePinState (uint8_t pin);
   void SetPinState (uint8_t pin , uint8_t state);
   void PuPd (uint8_t pin , PP p);
