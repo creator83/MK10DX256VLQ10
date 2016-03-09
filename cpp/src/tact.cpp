@@ -26,58 +26,43 @@ tact::tact (src_tact s)
 {
   src = s;
   f_cpu = 48;
-  if (s) init_hse();
-  else init_hsi();
-  
-  init_pll();
 }
 
 tact::tact (uint8_t frq, src_tact s )
 {
-  Set_frq(frq);
-  src = s;
-  
-  if (s) init_hse();
-  else init_hsi();
-
-  init_pll(f_cpu);
 }
 
-void tact::init_hse ()
+void tact::init_FBE (uint8_t div)
 {
-	/* SIM->CLKDIV1: OUTDIV1=0,OUTDIV2=0,OUTDIV3=1,OUTDIV4=1,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0 */
-	SIM_CLKDIV1 = 0x00110000u; /* Update system prescalers */
-	/* Switch to FBE Mode */
-	/* OSC->CR: ERCLKEN=0,??=0,EREFSTEN=0,??=0,SC2P=0,SC4P=0,SC8P=0,SC16P=0 */
-	OSC_CR = 0x00u;
-	/* MCG->C7: OSCSEL=0 */
-	MCG_C7 = 0x00u;
-	/* MCG->C2: ??=0,??=0,RANGE0=2,HGO=0,EREFS=1,LP=0,IRCS=0 */
-	MCG_C2 = 0x24u;
+	/*// If the internal load capacitors are being used, they should be selected
+	// before enabling the oscillator. Application specific. 16 pF and 8 pF selected
+	// in this example
+	OSC_CR = OSC_CR_SC16P_MASK | OSC_CR_SC8P_MASK;*/
+	// Enabling the oscillator for 8 MHz crystal
+	// RANGE=1, should be set to match the frequency of the crystal being used
+	// HGO=1, high gain is selected, provides better noise immunity but does draw
+	// higher current
+	// EREFS=1, enable the external oscillator
+	// LP=0, low power mode not selected (not actually part of osc setup)
+	// IRCS=0, slow internal ref clock selected (not actually part of osc setup)
+	MCG->C2 = MCG_C2_EREFS0_MASK|MCG_C2_RANGE0(1)|MCG_C2_HGO0_MASK;
 	/* MCG->C1: CLKS=2,FRDIV=3,IREFS=0,IRCLKEN=1,IREFSTEN=0 */
-	MCG_C1 = 0x9Au;
+	MCG->C1 = MCG_C1_FRDIV(3)|MCG_C1_CLKS(2);
+	// wait for oscillator to initialize
+	while (!(MCG->S & MCG_S_OSCINIT0_MASK));
+
+	// wait for Reference clock to switch to external reference
+	while (MCG->S & MCG_S_IREFST_MASK);
+
+	// Wait for MCGOUT to switch over to the external reference clock
+	while ((MCG->S&(1 << MCG_S_CLKST(2))) != 2);
 	/* MCG->C4: DMX32=0,DRST_DRS=0 */
-	MCG_C4 &= (uint8_t)~(uint8_t)0xE0u;
-	/* MCG->C5: ??=0,PLLCLKEN=0,PLLSTEN=0,PRDIV0=3 */
-	MCG_C5 = 0x03u;
-	/* MCG->C6: LOLIE=0,PLLS=0,CME=0,VDIV0=0 */
-	MCG_C6 = 0x00u;	 
-	while((MCG_S & MCG_S_OSCINIT0_MASK) == 0u); /* Check that the oscillator is running */
-	
-	while((MCG_S & MCG_S_IREFST_MASK) != 0u) ; /* Check that the source of the FLL reference clock is the external reference clock. */
-	
-	while((MCG_S & 0x0Cu) != 0x08u) ;    /* Wait until external reference clock is selected as MCG output */
-	
-	/* Switch to PBE Mode */
-	/* MCG_C5: ??=0,PLLCLKEN=0,PLLSTEN=0,PRDIV0=1 */
-	MCG_C5 = 0x01u;
-	  /* MCG->C6: LOLIE=0,PLLS=1,CME=0,VDIV0=1 */
-	  MCG_C6 = 0x41u;
-	  while((MCG_S & MCG_S_PLLST_MASK) == 0u) ; /* Wait until the source of the PLLS clock has switched to the PLL */
-	  
-	  while((MCG_S & MCG_S_LOCK0_MASK) == 0u) ; /* Wait until locked */
-	  
-	  
+	MCG->C4 &= ~(MCG_C4_DRST_DRS(3)|MCG_C4_DMX32_MASK);
+	// Now configure the PLL and move to PBE mode
+	// set the PRDIV field to generate a 4 MHz reference clock (8
+	// Now configure the PLL and move to PBE mode
+	// set the PRDIV field to generate a 4 MHz reference clock (8 MHz /2)
+	MCG->C5 = MCG_C5_PRDIV0(div);
 }
 
 void tact::init_hsi ()
@@ -92,20 +77,5 @@ void tact::Set_frq (uint8_t frq)
   
 }
 
-//Init PLL
-void tact::init_pll ()
-{
-	/* Switch to PEE Mode */
-	/* MCG->C1: CLKS=0,FRDIV=3,IREFS=0,IRCLKEN=1,IREFSTEN=0 */
-	MCG_C1 = (uint8_t)0x1Au;
-	while((MCG_S & 0x0Cu) != 0x0Cu) ;    /* Wait until output of the PLL is selected */
-	
-	while((MCG_S & MCG_S_LOCK0_MASK) == 0u) ; /* Wait until locked */
-	
-}    
 
-void tact::init_pll (uint8_t i)
-{
-
-}
 
