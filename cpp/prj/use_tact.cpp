@@ -2,6 +2,7 @@
 #include "gpio.h"
 #include "tact.h"
 #include "delay.h"
+#include "pit.h"
 
 
 tact frq;
@@ -10,9 +11,9 @@ tact frq;
 #define del_ms 1000
 #define pit_val del_ms*(F_CPU/1000)
 
-
-
+pit pit0 (pit::ch0, 1000, pit::ms);
 Gpio A (Gpio::A);
+
 extern "C" {
 	void PIT0_IRQHandler();
 }
@@ -20,8 +21,7 @@ extern "C" {
 
 void PIT0_IRQHandler()
 {
-	PIT->CHANNEL[0].TFLG |= PIT_TFLG_TIF_MASK;
-	//PTA->PTOR |= 1 << LED;
+	pit0.clear_flag ();
 	A.ChangePinState(LED);
 }
 
@@ -37,6 +37,7 @@ void pit_init (uint32_t div)
 
 int main(void)
 {
+
 	A.setOutPin(LED);
 	//SysTick_Config (SystemCoreClock/20);
 	//pit_init (pit_val);

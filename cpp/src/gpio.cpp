@@ -57,7 +57,10 @@ void Gpio::setOutPort (uint32_t value, mode m)
 	val.full = value;
 	PORT_GPCLR_REG(portAdrSet[prt]) = (val.half[0]<<16| 0x80 << m);
 	PORT_GPCHR_REG(portAdrSet[prt]) = (val.half[1]<<16| 0x80 << m);
-	GPIO_PDDR_REG(portAdr[prt]) |= value;
+	if (m == 1)
+	{
+		GPIO_PDDR_REG(portAdr[prt]) |= value;
+	}
 }
 
 void Gpio::setValPort (uint32_t value)
