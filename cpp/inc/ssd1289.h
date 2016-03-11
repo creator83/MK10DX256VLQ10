@@ -31,7 +31,7 @@ PTB18- D15
 #ifndef SSD1289_H
 #define SSD1289_H
 
-#define FMC
+#define FMC_
 
 const uint16_t BLACK =	0x0000;
 const uint16_t BLUE	 =  0xF800;
@@ -75,12 +75,13 @@ class ssd1289
 public:
 protected:
 private:
-#ifndef FMC
+#ifndef FMC_
 	Gpio pinData;
 	Gpio pinCommand;
 	enum commPins {RST, CS, RS, WR ,RD};
 #else
-	Gpio B,C,D;
+	Gpio B, C, D, pinCommand;
+	enum commPins {RST,RD};
 #endif
 
 //functions

@@ -1,7 +1,7 @@
 #include "ssd1289.h"
 
 
-#ifndef FMC
+#ifndef FMC_
 ssd1289::ssd1289()
 :pinData (Gpio::C) , pinCommand (Gpio::D)
 {
@@ -55,11 +55,14 @@ void ssd1289::wr_reg (uint16_t indx , uint16_t dta)
 #else
 
 ssd1289::ssd1289()
-:B(Gpio::B), C(Gpio::C),D(Gpio::D)
+:B(Gpio::B), C(Gpio::C), D(Gpio::D), pinCommand (Gpio::B)
 {
 	B.setOutPort ((1<<17|1<<18),Gpio::Alt5);
 	C.setOutPort (0xFFF, Gpio::Alt5);
 	D.setOutPort ((1<<1|1<<2|1<<3|1<<4|1<<5|1<<6),Gpio::Alt5);
+	pinCommand.setOutPin(RST);
+	pinCommand.setOutPin(RD);
+	pinCommand.setPin(RST);
 	SIM->SOPT2 |= SIM_SOPT2_FBSL(3);
 	SIM->SCGC7 |= SIM_SCGC7_FLEXBUS_MASK;
 	// CS0 base address
@@ -163,6 +166,7 @@ void  ssd1289::draw (uint16_t x , uint16_t y, uint16_t color, uint16_t phone, ui
 
 void ssd1289::init()
 {
+	pinCommand.clearPin(RST);
 	delay_ms(100);
 	pinCommand.setPin(RST);
 	/*	wr_reg(0X0007, 0X0021);   //далее записываем в регистры значения
