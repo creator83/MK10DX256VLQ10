@@ -37,6 +37,8 @@ void PIT0_IRQHandler()
 int main(void)
 {
 	indicator.get_buffer(4);
+
+
 	/*E.setOutPort(0xFFF);
 	E.setValPort(0xF00);
 	E.setValPort(0x6D);*/
