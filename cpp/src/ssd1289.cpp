@@ -110,7 +110,7 @@ void ssd1289::set_cursor (uint16_t x , uint16_t y)
 	wr_reg(0x004f, y);
 	index(0x0022);
 }
-/*
+
 void ssd1289::symbol (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, uint8_t ch)
 {
 	uint8_t pos = ch -32;
@@ -139,7 +139,7 @@ void ssd1289::string (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, ch
 		str++;
 		y-=8;
 	}
-}*/
+}
 
 void  ssd1289::draw (uint16_t x , uint16_t y, uint16_t color, uint16_t phone, uint8_t *ch)
 {

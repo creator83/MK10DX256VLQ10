@@ -16,6 +16,7 @@ int main()
 	ssd1289 lcd;
 	lcd.fill_screen(BLACK);
 	lcd.draw (50,50,WHITE,BLACK, font);
+	lcd.string(50,50,RED,GREEN, "Hello from Freescale");
 	delay_ms (2000);
   while (1)
   {

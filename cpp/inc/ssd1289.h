@@ -1,7 +1,7 @@
 #include "MK10D10.h"
 #include "gpio.h"
 #include "delay.h"
-//#include "font.h"
+#include "font.h"
 
 //FMC pins
 /*
@@ -89,8 +89,8 @@ public:
 	ssd1289();
 	void point (uint16_t x , uint16_t y, uint16_t color);
 	void fill_screen (uint16_t color);
-	//void symbol (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, uint8_t ch);
-	//void string (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, char *str);
+	void symbol (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, uint8_t ch);
+	void string (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, char *str);
 	void set_cursor (uint16_t x , uint16_t y);
 	void draw (uint16_t x , uint16_t y, uint16_t color, uint16_t phone, uint8_t *ch);
 protected:
