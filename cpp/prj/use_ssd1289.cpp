@@ -20,8 +20,6 @@ int main()
 	delay_ms (2000);
   while (1)
   {
-
-		
 		
 		for (uint8_t i=0;i<24;++i)
 		{
