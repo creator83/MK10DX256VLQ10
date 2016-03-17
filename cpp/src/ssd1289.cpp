@@ -50,12 +50,13 @@ void ssd1289::wr_reg (uint16_t indx , uint16_t dta)
 	index (indx);
 	data (dta);
 	pinCommand.setPin(CS);
+
 }
 
 #else
 
 ssd1289::ssd1289()
-:B(Gpio::B), C(Gpio::C), D(Gpio::D), pinCommand (Gpio::B)
+:B(Gpio::B), C(Gpio::C), D(Gpio::D), pinCommand (Gpio::C)
 {
 	B.setOutPort ((1<<17|1<<18),Gpio::Alt5);
 	C.setOutPort (0xFFF, Gpio::Alt5);
@@ -63,6 +64,7 @@ ssd1289::ssd1289()
 	pinCommand.setOutPin(RST);
 	pinCommand.setOutPin(RD);
 	pinCommand.setPin(RST);
+	pinCommand.setPin(RD);
 	SIM->SOPT2 |= SIM_SOPT2_FBSL(3);
 	SIM->SCGC7 |= SIM_SCGC7_FLEXBUS_MASK;
 	// CS0 base address
@@ -71,7 +73,7 @@ ssd1289::ssd1289()
 	// The address range is set to 128K	because the DC signal is connected on address wire
 	FB->CS[0].CSMR = FB_CSMR_V_MASK|FLEX_ADRESS_MASK;
 
-	//FB->CS[0].CSCR =
+	FB->CS[0].CSCR = FLEX_CSCR_MUX_MASK | FLEX_CSCR_AA_MASK | FLEX_CSCR_PS1_MASK;
 }
 
 void ssd1289::index(uint16_t value)
