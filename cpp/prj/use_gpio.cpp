@@ -5,7 +5,7 @@
 #include "pit.h"
 
 tact frq;
-const char led=18;
+const char led=17;
 
 
 
@@ -13,13 +13,13 @@ const char led=18;
 
 int main ()
 {
-	Gpio B (Gpio::B);
-	B.setOutPin(led);
+	Gpio E (Gpio::E);
+	E.setOutPin(led);
 
  
   while (1)
   {
-	  B.ChangePinState(led);
+	  E.ChangePinState(led);
 	  delay_ms(1000);
   }
 }

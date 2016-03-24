@@ -21,7 +21,7 @@ Gpio::Gpio(uint8_t p )
 
 void Gpio::setOutPin (uint8_t pin, mode m, dir d)
 {
-	PORT_PCR_REG(portAdrSet[prt],pin) |= 0x80 << m;
+	PORT_PCR_REG(portAdrSet[prt],pin) |= m << 8;
 	GPIO_PDDR_REG(portAdr[prt]) &= ~(1 << pin);
 	GPIO_PDDR_REG(portAdr[prt]) |= (d << pin);
 }

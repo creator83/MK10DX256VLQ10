@@ -1,14 +1,18 @@
-#include "MKL17Z4.h"                    // Device header
+#include "MK10D10.h"                    // Device header
 #include "uart.h"
+#include "tact.h"
+#include "delay.h"
 
+tact frq;
 
 int main ()
 {
 	uart uart2 (uart::baud9600);
-	uart2.transmit ("Hello from Freescale!!!");
+
 	while (1)
 	{
-		
+		uart2.transmit ("Hello from Freescale!!!");
+		delay_ms(2000);
 		
 	}
 }
