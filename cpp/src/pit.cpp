@@ -13,6 +13,7 @@ pit::pit (channel ch, uint16_t n, mode m)
 	(this->*(pit::set_func[m]))(n);
 	PIT->CHANNEL[n_ch].TCTRL |= PIT_TCTRL_TIE_MASK|PIT_TCTRL_TEN_MASK;
 
+
 	//enable interrupt
 	NVIC->ISER[(((uint32_t)(int32_t)(PIT0_IRQn+n_ch)) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)(PIT0_IRQn+n_ch)) & 0x1FUL));
 
