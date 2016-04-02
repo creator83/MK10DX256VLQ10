@@ -3,7 +3,6 @@
 
 GPIO_MemMapPtr Gpio::portAdr [5] = {PTA_BASE_PTR, PTB_BASE_PTR, PTC_BASE_PTR, PTD_BASE_PTR, PTE_BASE_PTR};
 PORT_MemMapPtr Gpio::portAdrSet [5] = {PORTA_BASE_PTR, PORTB_BASE_PTR, PORTC_BASE_PTR, PORTD_BASE_PTR, PORTE_BASE_PTR};
-//GPIO_MemMapPtr Gpio::portAdrBit [6] = {0x42000000, 0x42000400, 0x42000800,0,0,0x42001400};
 
 Gpio::Gpio (Port p)
 {
@@ -55,8 +54,10 @@ void Gpio::setOutPort (uint32_t value, mode m)
 		uint16_t half[2];
 	}val;
 	val.full = value;
-	PORT_GPCLR_REG(portAdrSet[prt]) = (val.half[0]<<16| 0x80 << m);
-	PORT_GPCHR_REG(portAdrSet[prt]) = (val.half[1]<<16| 0x80 << m);
+	PORT_GPCLR_REG(portAdrSet[prt]) = (val.half[0]<<16 & ~(0x07 << 8));
+	PORT_GPCLR_REG(portAdrSet[prt]) = (val.half[1]<<16 & ~(0x07 << 8));
+	PORT_GPCLR_REG(portAdrSet[prt]) = (val.half[0]<<16| m << 8);
+	PORT_GPCHR_REG(portAdrSet[prt]) = (val.half[1]<<16| m << 8);
 	if (m == 1)
 	{
 		GPIO_PDDR_REG(portAdr[prt]) |= value;
