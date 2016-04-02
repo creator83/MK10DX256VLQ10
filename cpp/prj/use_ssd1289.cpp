@@ -20,6 +20,7 @@ int main()
 	delay_ms (2000);
   while (1)
   {
+<<<<<<< HEAD
 		
 		for (uint8_t i=0;i<24;++i)
 		{
@@ -27,4 +28,16 @@ int main()
 			delay_ms (1000);
 		}
   }
+=======
+
+		
+		
+		for (uint8_t i=0;i<24;++i)
+		{
+			lcd.fill_screen(mass [i]);
+			delay_ms (1000);
+		}
+  }
+
+>>>>>>> branch 'master' of https://github.com/creator83/MK10DX256VLQ10.git
 }

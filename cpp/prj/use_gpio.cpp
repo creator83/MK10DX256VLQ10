@@ -1,22 +1,25 @@
 #include "MK10D10.h"                   // Device header
 #include "gpio.h"
 #include "tact.h"
+#include "delay.h"
+#include "pit.h"
 
-const char led=6;
+tact frq;
+const char led=17;
+
+
+
+
 
 int main ()
 {
-	//SysTick_Config (SystemCoreClock/1000000);
-	Gpio A (Gpio::A);
-	A.setOutPort(0xF0);
-	A.setValPort(0xF0);
-	A.clearValPort(0xF0);
-	SIM_SCGC6 |= SIM_SCGC6_PIT_MASK;
-	PIT_MCR |= 0X00;
-	//enable_irq (INT_PIT0-16);
+	Gpio E (Gpio::E);
+	E.setOutPin(led);
+
  
   while (1)
   {
-
+	  E.ChangePinState(led);
+	  delay_ms(1000);
   }
 }

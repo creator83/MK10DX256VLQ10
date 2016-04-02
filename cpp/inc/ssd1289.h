@@ -24,7 +24,7 @@ PTD3 - D3
 PTD4 - D2
 PTD5 - D1
 PTD6 - D0
-PTB17- DC
+PTB17- RS
 PTB18- D15
  */
 
@@ -81,7 +81,7 @@ private:
 	enum commPins {RST, CS, RS, WR ,RD};
 #else
 	Gpio B, C, D, pinCommand;
-	enum commPins {RST,RD};
+	enum commPins {RST = 14,RD};
 #endif
 
 //functions
