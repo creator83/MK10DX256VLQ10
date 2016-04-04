@@ -3,6 +3,8 @@
 #include "delay.h"
 #include "font.h"
 
+
+
 //FMC pins
 /*
 
@@ -31,7 +33,7 @@ PTB18- D15
 #ifndef SSD1289_H
 #define SSD1289_H
 
-#define FMC_
+//#define FMC_
 
 const uint16_t BLACK =	0x0000;
 const uint16_t BLUE	 =  0xF800;
@@ -75,20 +77,22 @@ class ssd1289
 public:
 protected:
 private:
-#ifndef FMC_
+/*
+	Gpio B, C, D, pinCommand;
+	enum commPins {RST = 14,RD};
+*/
 	Gpio pinData;
 	Gpio pinCommand;
 	enum commPins {RST, CS, RS, WR ,RD};
-#else
-	Gpio B, C, D, pinCommand;
-	enum commPins {RST = 14,RD};
-#endif
+
+
 
 //functions
 public:
 	ssd1289();
 	void point (uint16_t x , uint16_t y, uint16_t color);
 	void fill_screen (uint16_t color);
+	void fill_screen_l (uint16_t color);
 	void symbol (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, uint8_t ch);
 	void string (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, char *str);
 	void set_cursor (uint16_t x , uint16_t y);
@@ -99,7 +103,7 @@ private:
 	void index(uint16_t indx);
 	void data(uint16_t dta);
 	void wr_reg (uint16_t indx , uint16_t dta);
-
+	void data_raw (uint16_t dta);
 }; //ssd1289
 
 #endif //__SSD1289_H__

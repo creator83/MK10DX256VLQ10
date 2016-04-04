@@ -64,9 +64,14 @@ void Gpio::setOutPort (uint32_t value, mode m)
 	}
 }
 
-void Gpio::setValPort (uint32_t value)
+void Gpio::addValPort (uint32_t value)
 {
 	GPIO_PSOR_REG(portAdr[prt])  |= value;
+}
+
+void Gpio::setValPort (uint32_t value)
+{
+	GPIO_PDOR_REG(portAdr[prt])  = value;
 }
 
 void Gpio::clearValPort (uint32_t value)
