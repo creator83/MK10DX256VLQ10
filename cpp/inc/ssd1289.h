@@ -83,7 +83,11 @@ private:
 */
 	Gpio pinData;
 	Gpio pinCommand;
+<<<<<<< HEAD
 	enum commPins {RST=3, CS=4, RS=2, WR=1 ,RD=0};
+=======
+	enum commPins {RST, CS, RS, WR ,RD};
+>>>>>>> 0c9d04c1a9ebfa87217de59b11eefb444c8486f0
 
 
 
