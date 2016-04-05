@@ -30,7 +30,8 @@ public:
   void setOutPin (uint8_t pin, mode m = Alt1, dir d = Output);	
   void setPin (uint8_t pin);
   void clearPin (uint8_t pin);	
-  void setValPort (uint32_t value);	
+  void addValPort (uint32_t value);
+  void setValPort (uint32_t value);
   void clearValPort (uint32_t value);	
   void setOutPort (uint32_t value, mode m = Alt1);
   void ChangePinState (uint8_t pin);

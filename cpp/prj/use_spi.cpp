@@ -2,6 +2,7 @@
 #include "gpio.h"
 #include "tact.h"
 #include "delay.h"
+#include "spi.h"
 
 tact frq;
 const char CS=9;

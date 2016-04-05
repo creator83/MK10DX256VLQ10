@@ -1,45 +1,40 @@
 #include "ssd1289.h"
 
 
-#ifndef FMC_
 ssd1289::ssd1289()
-:pinData (Gpio::C) , pinCommand (Gpio::D)
+:pinData (Gpio::D) , pinCommand (Gpio::E)
 {
+	//Settings pins Bus
 	pinData.setOutPort(0xFFFF);
-	pinCommand.setOutPin (CS);
-	pinCommand.setOutPin (RS);
-	pinCommand.setOutPin (RST);
-	pinCommand.setOutPin (RD);
-	pinCommand.setOutPin (WR);
+	//Settings pin command
+	pinCommand.setOutPort (1<<CS|1<<RS|1<<RST|1<<RD|1<<WR);
 	pinCommand.setPin(CS);
+	pinCommand.setPin(RD);
 	pinCommand.setPin(WR);
+	pinCommand.clearPin(RST);
+	delay_ms(100);
+	pinCommand.setPin(RST);
 	init();
 } //ssd1289
 
 void ssd1289::index(uint16_t indx)
 {
-	pinCommand.setPin(RD);
+	pinCommand.clearPin(CS);
 	//отправляем команду
 	pinCommand.clearPin(RS);
-	pinCommand.clearPin(CS);
-	pinData.clearValPort (0xFFFF);
 	pinData.setValPort(indx);
 	pinCommand.clearPin(WR);
-	//delay_us(5);
 	pinCommand.setPin(WR);
 	pinCommand.setPin(CS);
 }
 
 void ssd1289::data(uint16_t dta)
 {
-	pinCommand.setPin(RD);
+	pinCommand.clearPin(CS);
 	//отправляем данные
 	pinCommand.setPin(RS);
-	pinCommand.clearPin(CS);
-	pinData.clearValPort(0xFFFF);
 	pinData.setValPort(dta);
 	pinCommand.clearPin(WR);
-	//delay_ms(2);
 	pinCommand.setPin(WR);
 	pinCommand.setPin(CS);
 }
@@ -47,13 +42,21 @@ void ssd1289::data(uint16_t dta)
 void ssd1289::wr_reg (uint16_t indx , uint16_t dta)
 {
 	pinCommand.clearPin(CS);
-	index (indx);
-	data (dta);
+	//отправляем команду
+	pinCommand.clearPin(RS);
+	pinData.setValPort(indx);
+	pinCommand.clearPin(WR);
+	pinCommand.setPin(WR);
+	//отправляем данные
+	pinCommand.setPin(RS);
+	pinData.setValPort(dta);
+	pinCommand.clearPin(WR);
+	pinCommand.setPin(WR);
 	pinCommand.setPin(CS);
 
 }
 
-#else
+/*
 
 ssd1289::ssd1289()
 :B(Gpio::B), C(Gpio::C), D(Gpio::D), pinCommand (Gpio::C)
@@ -92,25 +95,49 @@ void ssd1289::wr_reg (uint16_t indx , uint16_t dta)
 	index (indx);
 	data (dta);
 }
-#endif
+*/
 
 void ssd1289::point (uint16_t x , uint16_t y, uint16_t color)
 {
 	set_cursor(x,y);
+	index(0x0022);
 	data (color);	
 }
+
+void ssd1289::fill_screen_l (uint16_t color)
+{
+	set_cursor(0,0);
+	index(0x0022);
+	for (long i=0;i<76800;++i)data(color);
+}
+
 
 void ssd1289::fill_screen (uint16_t color)
 {
 	set_cursor(0,0);
-	for (long i=0;i<76800;++i)data(color);
+	index(0x0022);
+	pinCommand.clearPin(CS);
+	//отправляем данные
+	pinCommand.setPin(RS);
+	pinData.setValPort(color);
+	for (long i=0;i<76800;++i)
+		{
+			pinCommand.clearPin(WR);
+			pinCommand.setPin(WR);
+		}
+}
+
+void ssd1289::data_raw (uint16_t dta)
+{
+	pinData.setValPort(dta);
+	pinCommand.clearPin(WR);
+	pinCommand.setPin(WR);
 }
 
 void ssd1289::set_cursor (uint16_t x , uint16_t y)
 {
 	wr_reg(0x004e, x);
 	wr_reg(0x004f, y);
-	index(0x0022);
 }
 
 void ssd1289::symbol (uint16_t x, uint16_t y, uint16_t color, uint16_t phone, uint8_t ch)
@@ -168,9 +195,7 @@ void  ssd1289::draw (uint16_t x , uint16_t y, uint16_t color, uint16_t phone, ui
 
 void ssd1289::init()
 {
-	pinCommand.clearPin(RST);
-	delay_ms(100);
-	pinCommand.setPin(RST);
+
 	/*	wr_reg(0X0007, 0X0021);   //далее записываем в регистры значения
 	wr_reg(0X0000, 0X0001);
 	wr_reg(0X0007, 0X0023);
