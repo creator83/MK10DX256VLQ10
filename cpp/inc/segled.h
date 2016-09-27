@@ -1,4 +1,4 @@
-#include "MK10D10.h"                // Device header
+#include "MK10D10.h"
 #include "gpio.h"
 #include "pit.h"
 

@@ -14,7 +14,7 @@ class pit
 {
   //variables
 public:
-	enum channel {ch0, ch1, ch2, ch3};
+	enum channel {ch0, ch1};
 	enum mode {khz, hz, ms, us};
 private:
 	const uint8_t irq_n = 68;

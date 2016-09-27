@@ -13,24 +13,11 @@ uint8_t font [8] = {0x0E,0x11,0x11,0x11,0x1F,0x11,0x11,0x00};
 	
 int main()
 {
-	ssd1289 lcd;
 
   while (1)
   {
 
-		for (uint8_t i=0;i<7;++i)
-		{
-			lcd.fill_screen(mass [i]);
-
-		}
-
-  	  	  delay_ms (1000);
 		
-		for (uint8_t i=0;i<7;++i)
-		{
-			lcd.fill_screen(mass [i]);
-
-		}
   }
 
 

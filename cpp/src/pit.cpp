@@ -1,4 +1,3 @@
-
 #include "pit.h"
 
 ptr pit::set_func [4] = {&pit::khz_set, &pit::hz_set, &pit::ms_set, &pit::us_set};
