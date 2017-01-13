@@ -1,43 +1,70 @@
 #include "pit.h"
 
-ptr pit::set_func [4] = {&pit::khz_set, &pit::hz_set, &pit::ms_set, &pit::us_set};
+ptr Pit::set_func [4] = {&Pit::khz_set, &Pit::hz_set, &Pit::ms_set, &Pit::us_set};
 
 
 
-pit::pit (channel ch, uint16_t n, mode m)
+Pit::Pit (channel ch, uint16_t n, mode m)
 {
 	SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;
 	PIT->MCR = 0;
 	n_ch = ch;
-	(this->*(pit::set_func[m]))(n);
-	PIT->CHANNEL[n_ch].TCTRL |= PIT_TCTRL_TIE_MASK|PIT_TCTRL_TEN_MASK;
+	(this->*(Pit::set_func[m]))(n);
+
 
 
 	//enable interrupt
-	NVIC->ISER[(((uint32_t)(int32_t)(PIT0_IRQn+n_ch)) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)(PIT0_IRQn+n_ch)) & 0x1FUL));
+	//NVIC_EnableIRQ (PIT_IRQn);
 
 }
 
-void pit::khz_set (uint16_t val)
+void Pit::khz_set (uint16_t val)
 {
-	PIT->CHANNEL[n_ch].LDVAL = tact::get_frq_bus ()*1000*val;
+	PIT->CHANNEL[n_ch].LDVAL = Tact::getBusClock ()*1000/val;
 }
-void pit::hz_set (uint16_t val)
+void Pit::hz_set (uint16_t val)
 {
-	PIT->CHANNEL[n_ch].LDVAL = tact::get_frq_bus ()*1000000*val;
+	PIT->CHANNEL[n_ch].LDVAL = Tact::getBusClock ()*1000000/val;
 }
-void pit::ms_set (uint16_t val)
+void Pit::ms_set (uint16_t val)
 {
-	PIT->CHANNEL[n_ch].LDVAL = tact::get_frq_bus ()*1000*val;
-}
-
-void pit::us_set (uint16_t val)
-{
-	PIT->CHANNEL[n_ch].LDVAL = tact::get_frq_bus ()*val;
+	PIT->CHANNEL[n_ch].LDVAL = Tact::getBusClock ()*1000*val;
 }
 
-void pit::clear_flag ()
+void Pit::us_set (uint16_t val)
+{
+	PIT->CHANNEL[n_ch].LDVAL = Tact::getBusClock ()*val;
+}
+
+void Pit::clear_flag ()
 {
 	PIT->CHANNEL[n_ch].TFLG |= PIT_TFLG_TIF_MASK;
+}
+
+void Pit::start ()
+{
+	PIT->CHANNEL[n_ch].TCTRL |= PIT_TCTRL_TEN_MASK;
+}
+
+void Pit::stop ()
+{
+	PIT->CHANNEL[n_ch].TCTRL &= ~PIT_TCTRL_TEN_MASK;
+}
+
+void Pit::interrupt_enable ()
+{
+	PIT->CHANNEL[n_ch].TCTRL |= PIT_TCTRL_TIE_MASK;
+	NVIC->ISER[(((uint32_t)(int32_t)(irq_n+n_ch)) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)(irq_n+n_ch)) & 0x1FUL));
+}
+
+void Pit::interrupt_disable ()
+{
+	PIT->CHANNEL[n_ch].TCTRL &= ~PIT_TCTRL_TIE_MASK;
+	NVIC->ICER[(((uint32_t)(int32_t)(irq_n+n_ch)) >> 5UL)] = (uint32_t)(1UL << (((uint32_t)(int32_t)(irq_n+n_ch)) & 0x1FUL));
+}
+
+bool Pit::flag_TIF ()
+{
+	return (PIT->CHANNEL[n_ch].TFLG & PIT_TFLG_TIF_MASK);
 }
 

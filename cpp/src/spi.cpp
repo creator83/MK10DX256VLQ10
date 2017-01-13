@@ -1,86 +1,163 @@
 #include "spi.h"
 
-const uint32_t spi::Base_Adr [3] = {SPI0_BASE, SPI1_BASE, SPI2_BASE};
+Spi::Ctar_set Spi::C1;
+Spi::Ctar_set Spi::C0;
 
-//CS,SCK,MISO,MOSI
-uint8_t spi::pins_d[2][4]={{4,5,6,7},{6,3,4,5}};
+//Spi::Ctar_set* Spi::set_ctar [2] = {&Spi::C0, &Spi::C1};
+Spi::ctarPtr Spi::s_ctar [2] = {&Spi::C0, &Spi::C1};
 
-PotMemFn spi::ptr_receive[2] = {&spi::receive_8, &spi::receive_16};
-
-PotMemF spi::ptr_transmite[2] = {&spi::transmit_8, &spi::transmit_16};
-
-Ptr_F spi::spi_init[3] = {&spi::spi0_init,&spi::spi1_init, &spi::spi2_init};
-
-spi::spi(N_spi n_, PORT p, Division div, Cpol cpl, Cpha cph, Role r, Size s)
+void Spi::set_cpol (Spi &s, Cpol c)
 {
-	SpiN_ = n_;
-	port_ = p;
-	size_ = s;
-	(this->*(spi::spi_init[SpiN_]))();
+	s.set_cpol(c);
 }
 
-void spi::spi0_init ()
+void Spi::set_cpha (Spi &s, Cpha c)
+{
+	s.set_cpha(c);
+}
+
+void Spi::update_ctar ()
 {
 
 }
 
-void spi::spi1_init ()
+void Spi::set_ctar (Spi &s, CTAR_number c)
+{
+	s.set_ctar(c);
+}
+
+void Spi::set_baudrate (Spi &s, Division d)
+{
+	s.set_baudrate(d);
+}
+
+void Spi::set_f_size (Spi &s, Fsize f)
+{
+	s.set_f_size(f);
+}
+
+void Spi::set_ctar (CTAR_number n)
+{
+	ctar_ = (uint8_t)n;
+}
+
+
+Spi::Spi( Role r)
+{
+  //Turn on tacting Spi1
+  SIM->SCGC6 |= SIM_SCGC6_SPI0_MASK;
+
+  //Settings role and turn off tx and rx fifo
+  SPI0->MCR &= ~ (SPI_MCR_MSTR_MASK|SPI_MCR_MDIS_MASK);
+  SPI0->MCR |= SPI_MCR_MSTR(r)|SPI_MCR_DIS_TXF(1) |SPI_MCR_DIS_RXF(1);//|SPI_MCR_PCSIS(1<<0);
+  //сделать настройку
+  SPI0_CTAR(0) |= SPI_CTAR_PCSSCK(1)|SPI_CTAR_PASC(1);
+  //Start
+  SPI0->SR |= SPI_SR_EOQF_MASK;
+  SPI0->MCR &= ~(SPI_MCR_HALT_MASK|SPI_MCR_FRZ_MASK);
+}
+
+void Spi::set_cpol (Cpol c)
+{
+	s_ctar [ctar_]->cpol = (uint8_t)c;
+	SPI0_CTAR(ctar_) &= ~ SPI_CTAR_CPOL_MASK;
+	SPI0_CTAR(ctar_) |= SPI_CTAR_SLAVE_CPOL(c);
+}
+
+void Spi::set_cpha (Cpha c)
+{
+	s_ctar [ctar_]->cpha = (uint8_t)c;
+	SPI0_CTAR(ctar_) &= ~ SPI_CTAR_CPHA_MASK;
+	SPI0_CTAR(ctar_) |= SPI_CTAR_SLAVE_CPHA(c);
+}
+
+void Spi::set_f_size (Fsize f)
+{
+	s_ctar [ctar_]->f_size = (uint8_t)f;
+	SPI0_CTAR(ctar_) &= ~ SPI_CTAR_FMSZ(0x0F);
+	SPI0_CTAR(ctar_) |= SPI_CTAR_FMSZ(f);
+}
+
+void Spi::set_baudrate (Division d)
+{
+	s_ctar [ctar_]->br = (uint8_t) d;
+	SPI0_CTAR(ctar_) &= ~ SPI_CTAR_BR(0x0F);
+	SPI0_CTAR(ctar_) |= SPI_CTAR_BR (d);
+}
+
+void Spi::transmit (uint16_t data)
 {
 
 }
 
-void spi::spi2_init ()
+
+uint8_t Spi::receive ()
 {
 
 }
 
-void spi::Set_CS ()
+uint8_t Spi::exchange (uint8_t data)
 {
-  pin.setPin (pins_d[port_][CS]);
+
 }
 
-void spi::Clear_CS ()
+void Spi::put_data (uint16_t data, CS_number cs, CTAR_number ctar, State cont)
 {
-  pin.clearPin (pins_d[port_][CS]);
+
+	SPI0->PUSHR = SPI_PUSHR_PCS(1<<(uint8_t)cs)|SPI_PUSHR_TXDATA(data)|SPI_PUSHR_CTAS(ctar)|SPI_PUSHR_CONT(cont);
 }
 
-void spi::transmit_8 (uint16_t data)
+uint16_t Spi::get_data ()
 {
-	while (SPI1->SR&SPI_SR_BSY);
-	*(uint8_t *)&(SPI1->DR) = static_cast <uint8_t> (data);
+	return SPI0->POPR;
 }
 
-void spi::transmit_16 (uint16_t data)
+bool Spi::flag_tcf ()
 {
-	while (SPI1->SR&SPI_SR_BSY);
-	SPI1->DR = data;
+	return SPI0->SR&SPI_SR_TCF_MASK;
 }
 
-void spi::transmit (uint16_t data)
+bool Spi::flag_tfff ()
 {
-	(this->*(spi::ptr_transmite[size_]))(data);
+	return SPI0->SR&SPI_SR_TFFF_MASK;
 }
 
-uint16_t spi::receive_8 ()
+bool Spi::flag_tfuf ()
 {
-	//while (SPI1->SR&SPI_SR_BSY);
-	//SPI1_DR_8bit  = 0xFF;
-	//SPI1->DR = 0x0000;
-	*(uint8_t *)&(SPI1->DR) = 0x00;
-	while (!(SPI1->SR&SPI_SR_RXNE));
-	//return  (SPI1_DR_8bit) ;	
-	return static_cast <uint8_t>(SPI1->DR);	
+	return SPI0->SR&SPI_SR_TFUF_MASK;
 }
 
-uint16_t spi::receive_16 ()
+bool Spi::flag_txctr ()
 {
-	SPI1->DR = 0xFFFF;
-	while (!(SPI1->SR&SPI_SR_RXNE));
-	return SPI1->DR;	
+	return SPI0->SR&SPI_SR_TXCTR_MASK;
 }
 
-uint16_t spi::receive ()
+bool Spi::flag_rfof ()
 {
-	 return (this->*(spi::ptr_receive[size_]))();
+	return SPI0->SR&SPI_SR_RFOF_MASK;
 }
 
+bool Spi::flag_rfdf ()
+{
+	return SPI0->SR&SPI_SR_RFDF_MASK;
+}
+
+void Spi::clear_flag_tcf()
+{
+	SPI0->SR |= SPI_SR_TCF_MASK;
+}
+
+void Spi::clear_flag_tfuf()
+{
+	SPI0->SR |= SPI_SR_TFUF_MASK;
+}
+
+void Spi::clear_flag_rfof()
+{
+	SPI0->SR |= SPI_SR_RFOF_MASK;
+}
+
+void Spi::clear_flag_rfdf()
+{
+	SPI0->SR |= SPI_SR_RFDF_MASK;
+}

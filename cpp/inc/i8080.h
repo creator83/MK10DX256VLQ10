@@ -1,5 +1,6 @@
 #include "MK10D10.h"
-#include "gpio.h"
+#include "port.h"
+#include "pin.h"
 
 #ifndef I8080_H
 #define I8080_H
@@ -29,45 +30,37 @@ PTD6 - D0
 PTB17- RS
 PTB18- D15
  */
+const uint32_t cPort = 0x7FF;
+const uint32_t bPort = 0x60000;
+const uint32_t dPort = 0x7E;
+
+const uint32_t FLEXBUS_BASE_ADDRESS = 0x70000000;
+const uint32_t LCD_COMMAND_ADDRESS = 0x70000000;
+const uint32_t LCD_DATA_ADDRESS = 0x78000000;
+
+//apnote
+
+const uint32_t csMask = 0x10000;
 
 
 
-class i8080
+class I8080
 {
 //variables
 public:
-	enum MODE {Hardware, Software_16, Software_8};
+
 protected:
 private:
-
-	Gpio pinData;
-	Gpio pinCommand;
-	enum commPins_soft {RST=3, CS=4, RS=2, WR=1 ,RD=0};
-	enum commPins_soft {RST=3, CS=4, RS=2, WR=1 ,RD=0};
-	enum commPins_soft {RST=3, CS=4, RS=2, WR=1 ,RD=0};
-	enum commPins_hard {RST = 14,RD};
-	Gpio B, C, D;
-
-
+	Port b,c,d;
 //functions
 public:
-	i8080(MODE m);
+	I8080();
+	void index(uint16_t val);
+	void data(uint16_t val);
+	void wReg (uint16_t indx , uint16_t dta);
 
 protected:
 private:
-	void init_hardware ();
-	void init_software16 ();
-	void init_software8 ()
-	void index(uint16_t indx);
-	void data(uint16_t dta);
-	void wr_reg (uint16_t indx , uint16_t dta);
-	void wr_reg_hardware (uint16_t indx , uint16_t dta);
-	void wr_reg_software8 (uint16_t indx , uint16_t dta);
-	void wr_reg_software16 (uint16_t indx , uint16_t dta);
-	void data_raw (uint16_t dta);
-	void data_latch ();
-	inline void data_prepare (){pinCommand.clearPin(CS);pinCommand.setPin(RS)};
-
 
 };
 

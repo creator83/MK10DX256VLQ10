@@ -1,5 +1,6 @@
 #include "MK10D10.h"
 #include "tact.h"
+#include "pit.h"
 
 #ifndef DELAY_H
 #define DELAY_H

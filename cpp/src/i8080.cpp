@@ -1,93 +1,33 @@
 #include "i8080.h"
 
-#define SOFT
-
-#ifdef SOFT
-
-i8080::i8080(MODE m)
-:pinData (Gpio::C), pinCommand (Gpio::C)
+I8080::I8080()
+:b(Gpio::Port::B, Gpio::mux::Alt5, bPort), c (Gpio::Port::C, Gpio::mux::Alt5, cPort),
+ d(Gpio::Port::D, Gpio::mux::Alt5, dPort)
 {
-	pinCommand.setOutPort(1 << RST|1 << WR|1 << CS|1 << RS|1 << RD);
-	init();
+	SIM->SOPT2 |= SIM_SOPT2_FBSL(3);
+	SIM->SCGC7 |= SIM_SCGC7_FLEXBUS_MASK;
+	/*FB->CS[0].CSAR = FLEXBUS_BASE_ADDRESS;
+
+	FB->CS[0].CSMR = FB_CSMR_BAM(0x0800)|FB_CSMR_V_MASK;
+	FB->CS[0].CSCR = FB_CSCR_BLS_MASK|FB_CSCR_PS(2)| FB_CSCR_AA_MASK;
+
+	FB->CSPMCR = FB_CSPMCR_GROUP3(2);*/
+	FB->CS[0].CSMR = csMask|FB_CSMR_V_MASK;
+	FB->CS[0].CSCR = FB_CSCR_BLS_MASK|FB_CSCR_AA_MASK|FB_CSCR_PS(2);
 }
 
-void i8080::init_hardware ()
+void I8080::index(uint16_t val)
 {
-
+	*(uint32_t*)LCD_COMMAND_ADDRESS = val;
 }
 
-
-void i8080::index(uint16_t indx)
+void I8080::data(uint16_t val)
 {
-	//отправляем команду
-	pinCommand.clearPin(RS);
-	pinCommand.clearPin(CS);
-	pinData.clearValPort (1 << RST|1 << WR|1 << CS|1 << RS|1 << RD);
-	pinData.setValPort (indx >> 8);
-	pinCommand.clearPin(WR);
-	pinCommand.setPin(WR);
-	pinData.clearValPort (1 << RST|1 << WR|1 << CS|1 << RS|1 << RD);
-	pinData.setValPort (static_cast <uint8_t>(indx));
-	pinCommand.clearPin(WR);
-	pinCommand.setPin(WR);
-	pinCommand.setPin(CS);
+	*(uint32_t*)LCD_DATA_ADDRESS = val;
 }
 
-void i8080::data(uint16_t dta)
-{
-
-}
-void ili9325::wr_reg (uint16_t indx , uint16_t dta)
-{
-	index(indx);
-	data(dta);
-}
-
-
-/*void ili9325::wr_reg (uint16_t indx , uint16_t dta)
+void I8080::wReg (uint16_t indx , uint16_t dta)
 {
 	index (indx);
 	data (dta);
 }
-*/
-
-void ili9325::set_cursor (uint16_t x , uint16_t y)
-{
-	wr_reg (0x20 , x);
-	wr_reg(0x21 , y);
-	index(0x0022);
-}
-
-void ili9325::point (uint16_t x , uint16_t y, uint16_t color)
-{
-	set_cursor(x,y);
-	data(color);
-}
-
-void ili9325::fill_screen (uint16_t color)
-{
-	set_cursor(0,0);
-	for (long i=0;i<76800;++i)
-	{
-		data(color);
-	}
-}
-
-void ili9325::set_area (uint16_t x1 , uint16_t y1 , uint16_t x2 , uint16_t y2)
-{
-	x_start = x1;
-	x_end = x2;
-	y_start = y1;
-	y_end = y2;
-	wr_reg(h_Gram_start,x1);
-	wr_reg(v_Gram_start,y1);
-	wr_reg(h_Gram_end,x2);
-	wr_reg(v_Gram_end,y2);
-}
-
-void ili9325::putchar (uint16_t x , uint16_t y , char * ch , uint16_t color , uint16_t background)
-{
-	set_cursor(x,y);
-	
-}
-

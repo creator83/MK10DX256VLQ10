@@ -1,14 +1,17 @@
 #include "tact.h"
 
-uint8_t tact::cpu_clock;
-uint8_t tact::bus_clock;
+uint32_t Tact::coreClock;
+uint16_t Tact::busClock;
+uint16_t Tact::flexBusClock;
+uint16_t Tact::flashClock;
 
-tact::tact ()
+Tact::Tact ()
 {
-	
-	cpu_clock = 100;
-	bus_clock = 50;
-	init_PEE ();
+	initPEE ();
+	coreClock = 100000;
+	busClock = 50000;
+	flexBusClock = 25000;
+	flashClock = 25000;
 }
 /*
 tact::tact (src_tact s)
@@ -17,12 +20,12 @@ tact::tact (src_tact s)
   f_cpu = 48;
 }*/
 
-tact::tact (mode m, uint8_t frq)
+Tact::Tact (mode m, uint8_t frq)
 {
 
 }
 
-void tact::init_FBE ()
+void Tact::initFBE ()
 {
 	/*// If the internal load capacitors are being used, they should be selected
 	// before enabling the oscillator. Application specific. 16 pF and 8 pF selected
@@ -50,22 +53,22 @@ void tact::init_FBE ()
 	MCG->C4 &= ~(MCG_C4_DRST_DRS(3)|MCG_C4_DMX32_MASK);
 }
 
-void tact::init_PBE (uint8_t div)
+void Tact::initPBE (uint8_t div)
 {
 	// Now configure the PLL and move to PBE mode
 	// set the PRDIV field to generate a 4 MHz reference clock (8 MHz /4)
 	MCG->C5 = MCG_C5_PRDIV0(div);
 }
 
-void tact::init_PEE (uint8_t m)
+void Tact::initPEE (uint8_t m)
 {
-	init_FBE ();
-	init_PBE (3);
+	initFBE ();
+	initPBE (3);
 	// set up the SIM clock dividers BEFORE switching to the PLL to ensure the
 	// system clock speeds are in spec.
 	// core = PLL (100 MHz), bus = PLL/2 (50 MHz), flexbus = PLL/2 (50 MHz), flash = PLL/4 (25MHz)
 	SIM->CLKDIV1 = SIM_CLKDIV1_OUTDIV1(0) | SIM_CLKDIV1_OUTDIV2(1)
-	| SIM_CLKDIV1_OUTDIV3(1) | SIM_CLKDIV1_OUTDIV4(3);
+	| SIM_CLKDIV1_OUTDIV3(0x09) | SIM_CLKDIV1_OUTDIV4(3);
 	// set the VDIV field to 0, which is x24, giving 4 x 24 = 96 MHz
 	// the PLLS bit is set to enable the PLL
 	// the clock monitor is enabled, CME=1 to cause a reset if crystal fails
@@ -83,11 +86,7 @@ void tact::init_PEE (uint8_t m)
 }
 
 
-void tact::Set_frq (uint8_t frq)
-{
 
-  
-}
 
 
 
